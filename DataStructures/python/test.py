@@ -89,8 +89,6 @@ class TestDoublyLinkedList(unittest.TestCase):
         self.assertNotEqual(self.list.tail, element)
 
         self.list.remove("third element")
-        element = self.list.search("second element")
-
         self.assertEqual(self.list.tail, element)
         self.assertEqual(self.list.tail.next, None)
         self.assertEqual(self.list.size, 1)
