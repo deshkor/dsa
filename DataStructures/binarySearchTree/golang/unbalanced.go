@@ -40,7 +40,7 @@ func (t *Tree) Search(value int) (*Node, error) {
 }
 
 func (t *Tree) Remove(value int) error {
-
+	return nil
 }
 
 func (t *Tree) insertNode(root, node *Node) error {

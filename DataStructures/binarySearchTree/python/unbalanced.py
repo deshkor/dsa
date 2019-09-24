@@ -51,8 +51,8 @@ class Tree:
 			return node
 		elif node.value > value:
 			return self.contains(node.left, value)
-		else:
-			return self.contains(node.right, value)
+
+		return self.contains(node.right, value)
 
 	def remove(self, value):
 		node = self.search(value)
