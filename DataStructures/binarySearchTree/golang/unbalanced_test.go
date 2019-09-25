@@ -1,22 +1,11 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
-
-type nodeTC struct {
-	Value       int
-	ListSize    int
-	ExpectError bool
-}
-
-type searchTC struct {
-	Value       int
-	List        *Tree
-	ExpectNode  bool
-	ExpectError bool
-}
 
 var defaultListInsertSeq = []int{34, 44, 3, 12, -1, 33, -23, 100}
 
@@ -37,7 +26,11 @@ func getDefaultPopulatedTree() (*Tree, error) {
 func TestInsertNode(t *testing.T) {
 	tree := Tree{}
 
-	insertNodeTCs := []nodeTC{
+	testCases := []struct{
+		Value       int
+		ListSize    int
+		ExpectError bool
+	}{
 		{Value: 25, ListSize: 1, ExpectError: false},
 		{Value: 10, ListSize: 2, ExpectError: false},
 		{Value: 5, ListSize: 3, ExpectError: false},
@@ -46,7 +39,7 @@ func TestInsertNode(t *testing.T) {
 		{Value: 30, ListSize: 5, ExpectError: true},
 	}
 
-	for _, tc := range insertNodeTCs {
+	for _, tc := range testCases {
 		err := tree.Insert(tc.Value)
 		if tc.ExpectError {
 			assert.NotNil(t, err, "Should have got an error")
@@ -64,7 +57,12 @@ func TestSearchNode(t *testing.T) {
 
 	assert.Nil(t, err, "Shouldn't have failed while initializing default tree values")
 
-	searchTCs := []searchTC{
+	testCases := []struct{
+		Value       int
+		List        *Tree
+		ExpectNode  bool
+		ExpectError bool
+	} {
 		{Value: 10, List: &nilList, ExpectNode: false, ExpectError: true},
 		{Value: 10, List: populatedList, ExpectNode: false, ExpectError: false},
 		{Value: 33, List: populatedList, ExpectNode: true, ExpectError: false},
@@ -72,7 +70,7 @@ func TestSearchNode(t *testing.T) {
 		{Value: 34, List: populatedList, ExpectNode: true, ExpectError: false},
 	}
 
-	for _, tc := range searchTCs {
+	for _, tc := range testCases {
 		node, err := tc.List.Search(tc.Value)
 
 		if tc.ExpectError {
@@ -86,6 +84,29 @@ func TestSearchNode(t *testing.T) {
 			assert.Equal(t, node.Value, tc.Value)
 		} else {
 			assert.Nil(t, node)
+		}
+	}
+}
+
+func TestRemoveNode(t *testing.T) {
+	populatedList, err := getDefaultPopulatedTree()
+	assert.Nil(t, err, "Shouldn't have failed while initializing default tree values")
+
+	tcs := []struct{
+		val int
+		err bool
+	} {
+		{val: 34},
+		{val: 1000, err: true},
+	}
+
+	for i, tc := range tcs {
+		err := populatedList.Remove(tc.val)
+
+		if tc.err {
+			assert.NotNil(t, err, fmt.Sprintf("Expected an error for tc: %d", i))
+		} else {
+			assert.Nil(t, err, fmt.Sprintf("Unexpected error for tc: %d", i))
 		}
 	}
 }
