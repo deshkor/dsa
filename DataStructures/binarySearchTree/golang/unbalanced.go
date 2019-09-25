@@ -50,24 +50,19 @@ func (t *Tree) Remove(value int) error {
 		return err
 	}
 
-	// node is the root TODO: can this be reused?
+	// node is root
 	if parent == nil {
 		if node.Left == nil {
 			t.Root = node.Right
 		} else if node.Right == nil {
 			t.Root = node.Left
 		} else {
-			leastRightNode := node.Right
-			for leastRightNode.Left != nil {
-				cur := leastRightNode
-				leastRightNode = cur.Left
+			leastLeafNode, err := node.Right.getLeastLeafNode()
+			if err != nil {
+				return err
 			}
 
-			if leastRightNode == nil {
-				return fmt.Errorf("Invalid value while trying to delete.")
-			}
-
-			leastRightNode.Left = node.Left
+			leastLeafNode.Left = node.Left
 			t.Root = node.Right
 		}
 
@@ -77,12 +72,44 @@ func (t *Tree) Remove(value int) error {
 
 	// node to remove is on the left
 	if parent.Left == node {
+		leastLeafNode, err := node.Right.getLeastLeafNode()
+		if err != nil {
+			return err
+		}
+
+		parent.Left = node.Right
+		leastLeafNode.Left = node.Left
+
+		t.Size--
 		return nil
 	}
+		/*
+				10
+		5				15
+	3		7		13		17
+  1   4   6	  8	  11  14  16  19
+
+		*/
 
 	return nil
 }
 
+func (n *Node) getLeastLeafNode() (*Node, error) {
+	leastLeafNode := n
+
+	for leastLeafNode.Left != nil {
+		tmp := leastLeafNode
+		leastLeafNode = tmp.Left
+	}
+
+	if leastLeafNode == nil {
+		return nil, fmt.Errorf("Invalid value when searching for leaf node.")
+	}
+
+	return leastLeafNode, nil
+}
+
+// TODO: Update the search function to return both the node and the parent
 func (t *Tree) findParent(node *Node) (*Node, error) {
 	// the node is the root
 	if t.Root.Value == node.Value {

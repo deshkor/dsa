@@ -110,3 +110,12 @@ func TestRemoveNode(t *testing.T) {
 		}
 	}
 }
+
+
+func TestGetLeastLeafNode(t *testing.T) {
+	fmt.Println("TODO: TestGetLeastLeafNode")
+}
+
+func TestGetParent(t *testing.T) {
+	fmt.Println("TODO: TestGetParent")
+}
