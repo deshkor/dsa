@@ -26,7 +26,7 @@ func getDefaultPopulatedTree() (*Tree, error) {
 func TestInsertNode(t *testing.T) {
 	tree := Tree{}
 
-	testCases := []struct{
+	testCases := []struct {
 		Value       int
 		ListSize    int
 		ExpectError bool
@@ -57,12 +57,12 @@ func TestSearchNode(t *testing.T) {
 
 	assert.Nil(t, err, "Shouldn't have failed while initializing default tree values")
 
-	testCases := []struct{
+	testCases := []struct {
 		Value       int
 		List        *Tree
 		ExpectNode  bool
 		ExpectError bool
-	} {
+	}{
 		{Value: 10, List: &nilList, ExpectNode: false, ExpectError: true},
 		{Value: 10, List: populatedList, ExpectNode: false, ExpectError: false},
 		{Value: 33, List: populatedList, ExpectNode: true, ExpectError: false},
@@ -88,19 +88,34 @@ func TestSearchNode(t *testing.T) {
 	}
 }
 
+/*
+						10
+				5				15
+			3		7		13		17
+		  1   4   6	  8	  11  14  16  19
+
+*/
+
+
 func TestRemoveNode(t *testing.T) {
 	populatedList, err := getDefaultPopulatedTree()
 	assert.Nil(t, err, "Shouldn't have failed while initializing default tree values")
 
-	tcs := []struct{
+	tcs := []struct {
 		val int
 		err bool
-	} {
+	}{
 		{val: 34},
+		{val: 3},
+		{val: -1},
+		{val: -23},
+		{val: 100},
 		{val: 1000, err: true},
 	}
 
 	for i, tc := range tcs {
+		fmt.Println("Starting test:",i)
+
 		err := populatedList.Remove(tc.val)
 
 		if tc.err {
@@ -110,7 +125,6 @@ func TestRemoveNode(t *testing.T) {
 		}
 	}
 }
-
 
 func TestGetLeastLeafNode(t *testing.T) {
 	fmt.Println("TODO: TestGetLeastLeafNode")

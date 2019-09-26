@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -17,8 +16,45 @@ type Tree struct {
 	Size            int
 }
 
-func (t *Tree) Insert(value int) error {
+func (n *Node) getLeastLeaf() (*Node, error) {
+	leastLeaf := n
 
+	if leastLeaf == nil {
+		return nil, nil
+	}
+
+	for leastLeaf.Left != nil {
+		tmp := leastLeaf
+		leastLeaf = tmp.Left
+	}
+
+	if leastLeaf == nil {
+		return nil, fmt.Errorf("Invalid value when searching for the least leaf value")
+	}
+
+	return leastLeaf, nil
+}
+
+func (n *Node) getGreatestLeaf() (*Node, error) {
+	greatestLeaf := n
+
+	if greatestLeaf == nil {
+		return nil, nil
+	}
+
+	for greatestLeaf.Right != nil {
+		tmp := greatestLeaf
+		greatestLeaf = tmp.Right
+	}
+
+	if greatestLeaf == nil {
+		return nil, fmt.Errorf("Invalid value when searching for greatest leaf value")
+	}
+
+	return greatestLeaf, nil
+}
+
+func (t *Tree) Insert(value int) error {
 	node := Node{Value: value}
 
 	if t.Root == nil {
@@ -33,7 +69,7 @@ func (t *Tree) Insert(value int) error {
 
 func (t *Tree) Search(value int) (*Node, error) {
 	if t.Root == nil {
-		return nil, errors.New("Cannot search an empty tree")
+		return nil, fmt.Errorf("Cannot search an empty tree")
 	}
 
 	return t.searchTree(t.Root, value)
@@ -42,7 +78,7 @@ func (t *Tree) Search(value int) (*Node, error) {
 func (t *Tree) Remove(value int) error {
 	node, err := t.Search(value)
 	if node == nil || err != nil {
-		return fmt.Errorf("Can't delete %d from tree.", value)
+		return fmt.Errorf("Can't delete %d from tree", value)
 	}
 
 	parent, err := t.findParent(node)
@@ -57,9 +93,13 @@ func (t *Tree) Remove(value int) error {
 		} else if node.Right == nil {
 			t.Root = node.Left
 		} else {
-			leastLeafNode, err := node.Right.getLeastLeafNode()
+			leastLeafNode, err := node.Right.getLeastLeaf()
 			if err != nil {
 				return err
+			}
+
+			if leastLeafNode == nil {
+				return fmt.Errorf("Invalid main node for the deletion")
 			}
 
 			leastLeafNode.Left = node.Left
@@ -72,41 +112,39 @@ func (t *Tree) Remove(value int) error {
 
 	// node to remove is on the left
 	if parent.Left == node {
-		leastLeafNode, err := node.Right.getLeastLeafNode()
+		leastLeafNode, err := node.Right.getLeastLeaf()
 		if err != nil {
 			return err
 		}
 
-		parent.Left = node.Right
-		leastLeafNode.Left = node.Left
+		// means that there's no right tree for the node
+		if leastLeafNode == nil {
+			parent.Left = node.Left
+		} else {
+			parent.Left = node.Right
+			leastLeafNode.Left = node.Left
+		}
 
 		t.Size--
 		return nil
 	}
-		/*
-				10
-		5				15
-	3		7		13		17
-  1   4   6	  8	  11  14  16  19
 
-		*/
+	// node to remove is on the right
+	greatestLeafNode, err := node.Left.getGreatestLeaf()
+	if err != nil {
+		return err
+	}
 
+	// means that there's no node on the left
+	if greatestLeafNode == nil {
+		parent.Right = node.Right
+	} else {
+		parent.Right = node.Left
+		greatestLeafNode.Right = node.Right
+	}
+
+	t.Size--
 	return nil
-}
-
-func (n *Node) getLeastLeafNode() (*Node, error) {
-	leastLeafNode := n
-
-	for leastLeafNode.Left != nil {
-		tmp := leastLeafNode
-		leastLeafNode = tmp.Left
-	}
-
-	if leastLeafNode == nil {
-		return nil, fmt.Errorf("Invalid value when searching for leaf node.")
-	}
-
-	return leastLeafNode, nil
 }
 
 // TODO: Update the search function to return both the node and the parent
@@ -130,7 +168,7 @@ func (t *Tree) findParent(node *Node) (*Node, error) {
 	}
 
 	if current == nil {
-		return nil, fmt.Errorf("Unexpected value when setting up the tree to be searched.")
+		return nil, fmt.Errorf("Unexpected value when setting up the tree to be searched")
 	}
 
 	for {
@@ -147,7 +185,7 @@ func (t *Tree) findParent(node *Node) (*Node, error) {
 		}
 
 		if current == nil {
-			return nil, fmt.Errorf("Unexpected when searching for parent.")
+			return nil, fmt.Errorf("Unexpected when searching for parent")
 		}
 	}
 
@@ -156,7 +194,7 @@ func (t *Tree) findParent(node *Node) (*Node, error) {
 
 func (t *Tree) insertNode(root, node *Node) error {
 	if node == nil {
-		return errors.New("Cannot insert a nil node.")
+		return fmt.Errorf("Cannot insert a nil node")
 	}
 
 	if root.Value > node.Value {
@@ -169,7 +207,7 @@ func (t *Tree) insertNode(root, node *Node) error {
 
 	if root.Value <= node.Value {
 		if root.Value == node.Value && !t.AllowDuplicates {
-			return errors.New(fmt.Sprintf("Cannot insert duplicated value %d", node.Value))
+			return fmt.Errorf("Cannot insert duplicated value %d", node.Value)
 		}
 
 		if root.Right == nil {
@@ -180,7 +218,6 @@ func (t *Tree) insertNode(root, node *Node) error {
 	}
 
 	t.Size++
-
 	return nil
 }
 
